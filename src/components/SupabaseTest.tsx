@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import {ProtectedRoute} from "./ProtectedRoute.tsx";
+import {supabase} from "../lib/supabase.ts";
+import {useAuthContext} from "../context/AuthContext.tsx";
+import {Button, Text} from "@mantine/core";
+import MainAppShell from "./MainAppShell.tsx";
 
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
-console.log(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY)
 
 type ServiceCategory = {
     categoryname: string
@@ -10,6 +12,10 @@ type ServiceCategory = {
 
 function SupabaseTest() {
     const [instruments, setInstruments] = useState<ServiceCategory[]>([]);
+    const user = useAuthContext().user
+    const profile = useAuthContext().profile
+    const signOut = useAuthContext().signOut
+    
     useEffect(() => {
         getInstruments();
     }, []);
@@ -23,13 +29,27 @@ function SupabaseTest() {
         setInstruments(data);
     }
     
+    async function handleSignOut(){
+        await signOut();
+    }
+    
     return(
         <>
-            <ul>
-                {instruments.map((instrument) => (
-                    <li key={instrument.categoryname}>{instrument.categoryname}</li>
-                ))}
-            </ul>
+            <ProtectedRoute>
+                <MainAppShell>
+                    <Text>{profile ? profile.roles.rolename : ""}</Text>
+
+                    <Button onClick={() => {handleSignOut()}}>
+                        Test
+                    </Button>
+                    <ul>
+                        {instruments.map((instrument) => (
+                            <li key={instrument.categoryname}>{instrument.categoryname}</li>
+                        ))}
+                    </ul>
+                </MainAppShell>
+            </ProtectedRoute>
+
         </>
     )
 }
