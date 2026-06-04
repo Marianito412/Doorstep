@@ -53,7 +53,6 @@ export function useAuth(): AuthState {
         
         if (!error){
             setProfile(data)
-            console.log(profile)
         } 
         setLoading(false)
     }

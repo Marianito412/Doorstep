@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import {ProtectedRoute} from "./ProtectedRoute.tsx";
 import {supabase} from "../lib/supabase.ts";
 import {useAuthContext} from "../context/AuthContext.tsx";
 import {Button, Text} from "@mantine/core";
@@ -33,23 +32,18 @@ function SupabaseTest() {
         await signOut();
     }
     
-    return(
+    return (
         <>
-            <ProtectedRoute>
-                <MainAppShell>
-                    <Text>{profile ? profile.roles.rolename : ""}</Text>
+            <MainAppShell>
+                <Text>{profile ? profile.roles.rolename : "No User"}</Text>
 
-                    <Button onClick={() => {handleSignOut()}}>
-                        Test
-                    </Button>
-                    <ul>
-                        {instruments.map((instrument) => (
-                            <li key={instrument.categoryname}>{instrument.categoryname}</li>
-                        ))}
-                    </ul>
-                </MainAppShell>
-            </ProtectedRoute>
-
+                <Button onClick={() => {handleSignOut()}}>Test</Button>
+                <ul>
+                    {instruments.map((instrument) => (
+                        <li key={instrument.categoryname}>{instrument.categoryname}</li>
+                    ))}
+                </ul>
+            </MainAppShell>
         </>
     )
 }
