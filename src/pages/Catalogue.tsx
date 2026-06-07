@@ -1,11 +1,27 @@
 import MainAppShell from "../components/MainAppShell.tsx";
-import {Card, Group, Space, Stack, Title, Text, Button, Box, Select, Checkbox, RangeSlider, Chip,
-    Pagination, Avatar, Modal} from "@mantine/core";
+import {
+    Card, Group, Space, Stack, Title, Text, Button, Box, Select, Checkbox, RangeSlider, Chip,
+    Pagination, Avatar, Modal, Anchor
+} from "@mantine/core";
 import {FunnelIcon, StarIcon} from "@phosphor-icons/react";
 import {useDisclosure, useMediaQuery} from "@mantine/hooks";
+import {supabase} from "../lib/supabase.ts";
+import {useEffect, useState} from "react";
 
-function CatalogueEntry(){
+type Service = {
+    title: string
+    description: string
+}
+
+function CatalogueEntry({service}: {service: Service}) {
     const isMobile = useMediaQuery('(max-width: 768px)')
+
+    function truncateHtml(html: string, maxChars: number): string {
+        const doc   = new DOMParser().parseFromString(html, 'text/html')
+        const plain = doc.body.textContent ?? ''
+        if (plain.length <= maxChars) return plain
+        return plain.slice(0, maxChars).trimEnd() + '...'
+    }
     
     return (
         <Card orientation={isMobile ? 'vertical' : 'horizontal'} withBorder maw="1000">
@@ -13,10 +29,14 @@ function CatalogueEntry(){
             <Space w="30"/>
             <Stack align="stretch" w="100%">
                 <Group justify="space-between">
-                    <Title order={2}>Service Name</Title>
+                    <Title order={2}>{service.title}</Title>
                     <Title order={3} c="#006A6A">$150/hr</Title>
                 </Group>
-                <Text lineClamp={3}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc lobortis eu metus non cursus. Quisque vitae lorem consequat elit ornare bibendum porttitor non lectus. Ut euismod purus sed nibh luctus imperdiet. Curabitur ex sapien, suscipit euismod ante vel, molestie placerat est. Vestibulum tincidunt nibh sagittis, facilisis libero sed, pulvinar lorem. Sed laoreet hendrerit velit, sit amet condimentum orci blandit eget. Aenean at efficitur eros. Integer vel ante ut magna scelerisque varius. </Text>
+                {truncateHtml(service.description, 300)}
+                {/*<Typography>
+                    <div dangerouslySetInnerHTML={{ __html: service.description }} />
+                </Typography>
+                <Text lineClamp={3}>{service.description}</Text>*/}
                 <Group>
                     <Button variant="light" color="cyan">Book Now</Button>
                     <Button variant="outline">View Profile</Button>
@@ -34,7 +54,7 @@ function SearchFilter(){
         <Stack align="stretch">
             <Group justify="space-between" align="flex-end">
                 <Title order={2}>Filter</Title>
-                <Text size="lg">Clear all</Text>
+                <Anchor>Clear All</Anchor>
             </Group>
 
             <Stack gap={5}>
@@ -91,6 +111,22 @@ function FilterButton(){
 
 function Catalogue(){
     const isMobile = useMediaQuery('(max-width: 768px)')
+    const [searchResults, setSearchResults] = useState<Service[]>([])
+
+    useEffect(() => {
+        getSearchResults().then(() => {console.log("Test: ",searchResults)});
+    }, []);
+    
+    async function getSearchResults() {
+        const { data, error } = await supabase.from("services").select();
+        if (error) {
+            console.error(error);
+            return;
+        }
+        
+        setSearchResults(data);
+    }
+    
     return (
         <MainAppShell>
             <Box py="xl">
@@ -112,13 +148,11 @@ function Catalogue(){
                                 />
                             </Group>
                         </Group>
-                        <CatalogueEntry/>
-                        <CatalogueEntry/>
-                        <CatalogueEntry/>
-                        <CatalogueEntry/>
-                        <CatalogueEntry/>
-                        <CatalogueEntry/>
-                        <CatalogueEntry/>
+                        {
+                            searchResults.map((item, index) => (
+                                <CatalogueEntry service={item} key={index}/>
+                            ))
+                        }
                         <Pagination total={10} />
                     </Stack>
                 </Group>

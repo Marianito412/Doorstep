@@ -4,7 +4,6 @@ import {useAuthContext} from "../context/AuthContext.tsx";
 import {Button, Text} from "@mantine/core";
 import MainAppShell from "./MainAppShell.tsx";
 
-
 type ServiceCategory = {
     categoryname: string
 }
