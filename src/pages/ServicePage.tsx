@@ -107,7 +107,7 @@ function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
     })
 
     async function handleSubmit(values: BookingFormValues) {
-        console.log("Test")
+        console.log(values.address)
         setLoading(true)
         await delay(1000);
         setLoading(false)
