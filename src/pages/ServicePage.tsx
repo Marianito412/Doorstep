@@ -15,7 +15,7 @@ type ServiceCardProps = {
 
 function ServiceCard({ title, rating, reviewCount, imageUrl }: ServiceCardProps) {
     return (
-        <Card radius="md" p={0} style={{ overflow: 'hidden', position: 'relative', cursor: 'pointer' }}>
+        <Card shadow="lg" radius="md" p={0} style={{ overflow: 'hidden', position: 'relative', cursor: 'pointer' }}>
             <Image src={imageUrl} h={400}/>
             {/* Gradient overlay */}
             <Box
@@ -63,24 +63,25 @@ type PriceProps = {
 function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
     return (
         <Card shadow="lg" padding="lg" withBorder miw={350}>
-            <Group align="self-end" gap={3}>
-                <Title fw={600}>${minPrice}</Title>
-                <Text c="dimmed" fw={600}>/hour</Text>
-            </Group>
-            <Card.Section>
-                <Divider my="md" mx="0"/>    
+            <Card.Section bg="gray.2">
+                <Group align="self-end" gap={3} mx="lg" mt="lg">
+                    <Title fw={600} c="teal.9">${minPrice}</Title>
+                    <Text c="gray.7" fw={600}>/hour</Text>
+                </Group>
+                <Text ml="lg" c="gray.7" fw={600}>*Starting rate for standard service</Text>
+                <Divider mt="md" mx="0"/>
             </Card.Section>
 
-            <Group justify="space-between" mx="sm">
-                <Text fw={600} c="dimmed">Min. Booking</Text>
+            <Group justify="space-between" mx="sm" mt="md">
+                <Text fw={600} c="gray.7">Min. Booking</Text>
                 <Text fw={600}>2 hours</Text>
             </Group>
             
             <Group justify="space-between" mx="sm">
-                <Text fw={600} c="dimmed">Min. Booking</Text>
-                <Text fw={600}>2 hours</Text>
+                <Text fw={600} c="gray.7">Service Fee</Text>
+                <Text fw={600}>$9.99</Text>
             </Group>
-
+            
             <Divider my="md" mx="0"/>
 
             <Group justify="space-between" mx="sm" wrap="nowrap">
@@ -97,13 +98,13 @@ function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
     )
 }
 
-function ServiceProviderCard(){
+function ServiceProviderCard({name}: {name: string}){
     return (
-        <Card orientation="horizontal" withBorder>
+        <Card shadow="lg" orientation="horizontal" withBorder>
             <Avatar radius={120} size={120} color="indigo"/>
             <Space w="30"/>
             <Stack>
-                <Title order={2} fw={600}>Service Provided by {}</Title>
+                <Title order={2} fw={600}>Service Provided by {name}</Title>
             </Stack>
         </Card>
     )
@@ -111,7 +112,12 @@ function ServiceProviderCard(){
 
 type Service = {
     title: string
-    description: string
+    description: string,
+    fullname: string,
+    pricetype: string,
+    minprice: number,
+    maxprice: number,
+    categoryname: string
 }
 
 function ServicePage(){
@@ -123,9 +129,19 @@ function ServicePage(){
     console.log("TestQuery: ", serviceId);
     
     useEffect(() => {
-        getService()
+        getServiceDisplayData()
     }, []);
-    //"5d180b4c-7868-4270-aa8a-5d0f5c88615f"
+    
+    async function getServiceDisplayData(){
+        const { data, error } = await supabase.rpc('get_service_display_data', { p_service_id: serviceId })
+        if (error) {
+            console.error(error);
+            return;
+        }
+        console.log(data[0])
+        setService(data[0]);
+    }
+    
     async function getService() {
         const { data, error } = await supabase.from("services").select().eq("serviceid", serviceId);
         if (error) {
@@ -148,11 +164,11 @@ function ServicePage(){
                         reviewCount={128}
                         imageUrl="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-6.png"
                     />
-                    <ServiceProviderCard/>
-                    <Title fw={600}>About this Service</Title>
+                    <ServiceProviderCard name = {service?.fullname}/>
+                    <Title order={2} fw={600}>About this Service</Title>
 
                     {service ?
-                        <Card>
+                        <Card shadow="lg" withBorder>
                             <Typography>
                                 <div dangerouslySetInnerHTML={{__html: service.description}}/>
                             </Typography>

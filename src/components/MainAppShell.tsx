@@ -1,7 +1,18 @@
-import {AppShell, Burger, Group, NavLink, SegmentedControl, Title} from "@mantine/core";
+import {
+    ActionIcon,
+    AppShell,
+    Burger,
+    Group,
+    NavLink,
+    SegmentedControl,
+    TextInput,
+    Title,
+    UnstyledButton
+} from "@mantine/core";
+
 import {useDisclosure} from "@mantine/hooks";
-import {DoorOpenIcon} from '@phosphor-icons/react';
-import type {ReactNode} from "react";
+import {ArrowRightIcon, DoorOpenIcon, MagnifyingGlassIcon} from '@phosphor-icons/react';
+import {type ReactNode, useState} from "react";
 import {useNavigate, useLocation} from "react-router-dom";
 
 const links = [
@@ -24,6 +35,46 @@ const links = [
         ),
     }
 ]
+
+function SearchBar(){
+    const [query, setQuery] = useState('')
+    const navigate = useNavigate()
+    
+    function onSearch() {
+        if (!query.trim()) return
+        navigate({
+            pathname: '/',
+            search: `?search=${encodeURIComponent(query)}`
+        })
+    }
+    
+    return (
+        <TextInput
+            radius="xl"
+            size="md"
+            placeholder="Search services"
+            onKeyDown={(e) => {
+                if (e.key === 'Enter'){
+                    e.preventDefault()
+                    onSearch()   
+                }
+            }}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+            rightSectionWidth={42}
+            leftSection={<MagnifyingGlassIcon size={32} />}
+            rightSection={
+                <ActionIcon onClick={(e) => {
+                   e.preventDefault()
+                   onSearch() 
+                }} size={32} radius="xl" variant="filled" aria-label="Search">
+                    <ArrowRightIcon size={18} stroke="2" />
+                </ActionIcon>
+            }
+            aria-label="Search questions"
+        />
+    );
+}
+
 function MainAppShell({children}: {children: ReactNode}) {
     const [opened, { toggle }] = useDisclosure();
     const navigate = useNavigate();
@@ -47,12 +98,18 @@ function MainAppShell({children}: {children: ReactNode}) {
                 <Group h="100%" justify="space-between">
                     <Group hiddenFrom="sm">
                         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-                        <Title><DoorOpenIcon weight="duotone"/>Doorstep</Title>
+                        <UnstyledButton component="a" href="/">
+                            <Title><DoorOpenIcon weight="duotone"/>Doorstep</Title>    
+                        </UnstyledButton>
                     </Group>
                     
                     <Group ml="10" visibleFrom="sm">
-                        <Title><DoorOpenIcon weight="duotone"/>Doorstep</Title>
+                        <UnstyledButton component="a" href="/">
+                            <Title><DoorOpenIcon weight="duotone"/>Doorstep</Title>
+                        </UnstyledButton>
                     </Group>
+
+                    <SearchBar/>
                     
                     <SegmentedControl value={location.pathname} mr="70" visibleFrom="sm" data={links} onChange={onSegmenteControlChange}></SegmentedControl>
                 </Group>
