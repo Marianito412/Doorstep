@@ -1,9 +1,9 @@
 import MainAppShell from "../components/MainAppShell.tsx";
 import {
-    Card, Group, Space, Stack, Title, Text, Button, Box, Select, Checkbox, RangeSlider, Chip,
-    Pagination, Avatar, Modal, Anchor, type RangeSliderValue
+    Card, Group, Space, Stack, Title, Text, Button, Box, Select, RangeSlider,
+    Avatar, Modal, type RangeSliderValue
 } from "@mantine/core";
-import {FunnelIcon, StarIcon} from "@phosphor-icons/react";
+import {FunnelIcon} from "@phosphor-icons/react";
 import {useDisclosure, useMediaQuery} from "@mantine/hooks";
 import {supabase} from "../lib/supabase.ts";
 import {useEffect, useState} from "react";
