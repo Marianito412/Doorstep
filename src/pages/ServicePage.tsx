@@ -1,10 +1,30 @@
 import MainAppShell from "../components/MainAppShell.tsx";
-import {Image, Box, Card, Group, Stack, Text, Title, Button, Divider, Space, Avatar, Typography} from "@mantine/core";
-import {StarIcon} from "@phosphor-icons/react";
+import {
+    Image,
+    Box,
+    Card,
+    Group,
+    Stack,
+    Text,
+    Title,
+    Button,
+    Divider,
+    Space,
+    Avatar,
+    Typography,
+    Modal,
+    TextInput,
+    Textarea
+} from "@mantine/core";
+import '@mantine/dates/styles.css'
+import {CheckCircleIcon, StarIcon} from "@phosphor-icons/react";
 import {supabase} from "../lib/supabase.ts";
 import {useEffect, useState} from "react";
 import {useMediaQuery} from "@mantine/hooks";
 import {useSearchParams} from "react-router-dom";
+import {DateTimePicker} from "@mantine/dates";
+import {useForm} from "@mantine/form";
+import {notifications} from "@mantine/notifications";
 
 type ServiceCardProps = {
     title: string
@@ -60,8 +80,84 @@ type PriceProps = {
     priceType: string
 }
 
+type BookingFormValues = {
+    scheduled_at: Date | null
+    description:  string
+    address:      string
+}
+
 function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
+    const [opened, setOpened] = useState(false)
+    const [loading, setLoading] = useState(false)
+
+    const delay = (ms: number): Promise<void> => {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    };
+    
+    const form = useForm<BookingFormValues>({
+        initialValues: {
+            scheduled_at: null,
+            description:  '',
+            address:      '',
+        },
+        validate: {
+            scheduled_at: (val) => !val ? 'Seleccioná una fecha y hora' : null,
+            address:      (val) => val.trim().length < 5 ? 'Ingresá una dirección válida' : null,
+        }
+    })
+
+    async function handleSubmit(values: BookingFormValues) {
+        console.log("Test")
+        setLoading(true)
+        await delay(1000);
+        setLoading(false)
+        setOpened(false)
+
+        notifications.show({
+            title:   '¡Reserva confirmada!',
+            message: 'Tu solicitud fue enviada. El proveedor la revisará pronto.',
+            color:   'teal',
+            icon:    <CheckCircleIcon size={20} weight="fill" />,
+        })
+    }
+    
     return (
+        <>
+        <Modal
+            opened={opened}
+            onClose={() => setOpened(false)}
+            title="Reservar servicio"
+            centered
+        >
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+                <Stack>
+                    <DateTimePicker
+                        label="Fecha y hora"
+                        placeholder="Seleccioná cuándo necesitás el servicio"
+                        minDate={new Date()}
+                        {...form.getInputProps('scheduled_at')}
+                    />
+
+                    <TextInput
+                        label="Dirección"
+                        placeholder="Ej: De la Iglesia 200m norte, casa verde"
+                        {...form.getInputProps('address')}
+                    />
+
+                    <Textarea
+                        label="Descripción"
+                        placeholder="Describí brevemente qué necesitás. Ej: jardín de 80m², incluye poda y abono"
+                        rows={4}
+                        {...form.getInputProps('description')}
+                    />
+
+                    <Button type="submit" loading={loading} fullWidth>
+                        Confirmar reserva
+                    </Button>
+                </Stack>
+            </form>
+        </Modal>
+        
         <Card shadow="lg" padding="lg" withBorder miw={350}>
             <Card.Section bg="gray.2">
                 <Group align="self-end" gap={3} mx="lg" mt="lg">
@@ -93,10 +189,11 @@ function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
             
             <Space h="xs"/>
             <Stack gap="xs">
-                <Button size="md" fullWidth variant="filled" >Hire Now!</Button>
-                <Button size="md" fullWidth variant="outline">Contact</Button>
+                <Button size="md" fullWidth variant="filled" onClick={() => setOpened(true)}>Hire Now!</Button>
+                <Button size="md" fullWidth variant="outline" component="a" href="mailto:john2@doe.com">Contact</Button>
             </Stack>
         </Card>
+        </>
     )
 }
 
