@@ -170,6 +170,14 @@ function Catalogue(){
     useEffect(() => {
         const query = searchParams.get('search')
         console.log('search param changed:', query) // does this fire?
+        getSearchData({
+            query:    searchParams.get('search')   ?? '',
+            city:     searchParams.get('city')     ?? undefined,
+            category: searchParams.get('category') ? Number(searchParams.get('category')) : undefined,
+            minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
+            maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
+        })
+        /*
         if (query) {
             getSearchData({
                 query:    searchParams.get('search')   ?? '',
@@ -177,30 +185,65 @@ function Catalogue(){
                 category: searchParams.get('category') ? Number(searchParams.get('category')) : undefined,
                 minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
                 maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
-            })  
+            })
         }
         else
         {
             fetchLatest()
         }
+         */
     }, [searchParams])
     
     async function getSearchData(filters: SearchFilters){
-        const { data, error } = await supabase.rpc("search_services", {
-            query:            filters.query        ?? '',
-            filter_city:      filters.city         ?? null,
-            filter_category:  filters.category     ?? null,
-            filter_min_price: filters.minPrice     ?? null,
-            filter_max_price: filters.maxPrice     ?? null,
-        });
-        if (error) {
-            console.error(error);
-            return;
+        if (filters.query){
+            console.log("fuck")
+            const { data, error } = await supabase.rpc("search_services", {
+                query:            filters.query        ?? '',
+                filter_city:      filters.city         ?? null,
+                filter_category:  filters.category     ?? null,
+                filter_min_price: filters.minPrice     ?? null,
+                filter_max_price: filters.maxPrice     ?? null,
+            });
+            if (error) {
+                console.error(error);
+                return;
+            }
+            setSearchResults(data);
+            console.log(data)    
         }
-        setSearchResults(data);
-        console.log(data)
+        else{
+            console.log("no fuck")
+            // Sin búsqueda, traer los más recientes con filtros aplicados
+            let q = supabase
+                .from('services')
+                .select(`
+        serviceid,
+        title,
+        description,
+        minprice,
+        maxprice,
+        pricetype,
+        providerprofiles!inner (
+          city,
+          profiles!inner (fullname)
+        )
+      `)
+                .order('createdat', { ascending: false })
+                .limit(10)
+
+            if (filters.city)     q = q.eq('providerprofiles.city', filters.city)
+            if (filters.category) q = q.eq('servicecategoryid', filters.category)
+            if (filters.minPrice) q = q.gte('minprice', filters.minPrice)
+            if (filters.maxPrice) q = q.lte('maxprice', filters.maxPrice)
+
+            const { data, error } = await q
+            if (!error) setSearchResults(data)
+            console.log(data)
+        }
+        
     }
 
+    /*
     async function fetchLatest() {
         console.log("Latest fetched")
         const { data, error } = await supabase
@@ -219,6 +262,7 @@ function Catalogue(){
         if (!error) setSearchResults(data)
         console.log(data)
     }
+     */
     
     return (
         <MainAppShell>
