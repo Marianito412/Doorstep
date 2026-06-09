@@ -65,14 +65,16 @@ function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
         <Card shadow="lg" padding="lg" withBorder miw={350}>
             <Card.Section bg="gray.2">
                 <Group align="self-end" gap={3} mx="lg" mt="lg">
-                    <Title fw={600} c="teal.9">{minPrice}-{maxPrice} {priceType === "hourly" ? "$/hr":""}</Title>
-                    <Text c="gray.7" fw={600}>/hour</Text>
+                    <Title order={2} fw={600} c="teal.9">
+                        ₡{minPrice===maxPrice ? minPrice : minPrice + "-" + maxPrice}
+                    </Title>
+                    <Text size="xl" c="gray.7" fw={600}>{priceType === "hourly" ? "/hr":""}</Text>
                 </Group>
                 <Text ml="lg" c="gray.7" fw={600}>*Starting rate for standard service</Text>
                 <Divider mt="md" mx="0"/>
             </Card.Section>
 
-            <Group justify="space-between" mx="sm" mt="md">
+            {/*<Group justify="space-between" mx="sm" mt="md">
                 <Text fw={600} c="gray.7">Min. Booking</Text>
                 <Text fw={600}>2 hours</Text>
             </Group>
@@ -87,24 +89,25 @@ function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
             <Group justify="space-between" mx="sm" wrap="nowrap">
                 <Title order={3} fw={600}>Estimated Total</Title>
                 <Title order={3} fw={600} c="teal.9">$99.99</Title>
-            </Group>
+            </Group>*/}
             
             <Space h="xs"/>
             <Stack gap="xs">
-                <Button size="md" fullWidth variant="filled" color="cyan">Hire Now!</Button>
+                <Button size="md" fullWidth variant="filled" >Hire Now!</Button>
                 <Button size="md" fullWidth variant="outline">Contact</Button>
             </Stack>
         </Card>
     )
 }
 
-function ServiceProviderCard({name}: {name: string}){
+function ServiceProviderCard({name, bio}: {name: string, bio: string}) {
     return (
         <Card shadow="lg" orientation="horizontal" withBorder>
             <Avatar radius={120} size={120} color="indigo"/>
             <Space w="30"/>
             <Stack>
                 <Title order={2} fw={600}>Service Provided by {name}</Title>
+                <Text>{bio}</Text>
             </Stack>
         </Card>
     )
@@ -117,7 +120,8 @@ type Service = {
     pricetype: string,
     minprice: number,
     maxprice: number,
-    categoryname: string
+    categoryname: string,
+    bio: string
 }
 
 function ServicePage(){
@@ -150,12 +154,12 @@ function ServicePage(){
                    style={{flexDirection: isMobile ? 'column' : 'row'}}>
                 <Stack style={{ flex: 1, width: '100%' }}>
                     <ServiceCard
-                        title="Premium Eco-Friendly House Cleaning"
+                        title={service? service?.title:"Title"}
                         rating={4.9}
                         reviewCount={128}
                         imageUrl="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-6.png"
                     />
-                    <ServiceProviderCard name = {service ? service.fullname : ""}/>
+                    <ServiceProviderCard name = {service ? service.fullname : ""} bio={service ? service.bio : ""}/>
                     <Title order={2} fw={600}>About this Service</Title>
 
                     {service ?
@@ -167,7 +171,7 @@ function ServicePage(){
                         : null}
                 </Stack>
                 <Stack style={{ width: isMobile ? '100%' : 320, flexShrink: 0 }}>
-                    <PriceCard minPrice={9.99} maxPrice={300} priceType="100"/>
+                    <PriceCard minPrice={service?.minprice || 0} maxPrice={service?.maxprice || 0} priceType={service?.pricetype || "hourly"}/>
                 </Stack>
             </Group>
         </MainAppShell>

@@ -29,13 +29,15 @@ function CatalogueEntry({service}: {service: Service}) {
     }
     
     return (
-        <Card orientation={isMobile ? 'vertical' : 'horizontal'} withBorder maw="1000" component="a" href={"service?id="+service.serviceid}>
+        <Card orientation={isMobile ? 'vertical' : 'horizontal'} withBorder maw="1200" component="a" href={"service?id="+service.serviceid}>
             <Avatar radius="xl" size={150}/>
             <Space w="30"/>
             <Stack align="stretch" w="100%">
-                <Group justify="space-between" wrap="nowrap" align="flex-start">
+                <Group justify="space-between" wrap={isMobile? "wrap" : "nowrap"} align="flex-start">
                     <Title order={2}>{service.title}</Title>
-                    <Title order={3} c="#006A6A" textWrap="nowrap">{service.minprice}-{service.maxprice} {service.pricetype === "hourly" ? "$/hr":""}</Title>
+                    <Title order={3} c="#006A6A" textWrap="nowrap">
+                        {service.minprice===service.maxprice ? "₡"+service.minprice : "₡"+service.minprice+" - "+"₡"+service.maxprice} {service.pricetype === "hourly" ? "/hr" : ""}
+                    </Title>
                 </Group>
                 {truncateHtml(service.description, 300)}
                 
@@ -52,7 +54,7 @@ function CatalogueEntry({service}: {service: Service}) {
 function SearchFilter(){
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
-    const [cities, setCities] = useState(["None"])
+    const [cities, setCities] = useState<string[]>(["None"])
 
     useEffect(() => {
         getCities()
@@ -65,8 +67,10 @@ function SearchFilter(){
             return;
         }
         console.log(data)
-        setCities(data?.map((value) => (value.city)))
-        //cities = data
+        if (data){
+            const foundCities: Set<string> = new Set(data.map((value) => (value.city)))
+            setCities([...foundCities])
+        }
     }
     
     function handleCityFilter(value: string | null){
@@ -93,15 +97,15 @@ function SearchFilter(){
         <Stack align="stretch">
             <Group justify="space-between" align="flex-end">
                 <Title order={2}>Filter</Title>
-                <Anchor>Clear All</Anchor>
+                {/*<Anchor>Clear All</Anchor>*/}
             </Group>
 
-            <Stack gap={5}>
+            {/*<Stack gap={5}>
                 <Title fw={600} order={4}>Service Type</Title>
                 <Checkbox size="sm" defaultChecked label="This is a lot of text"/>
                 <Checkbox size="sm" defaultChecked label="This is a lot of text"/>
                 <Checkbox size="sm" defaultChecked label="This is a lot of text"/>
-            </Stack>
+            </Stack>*/}
 
             <Stack gap={2}>
                 <Title fw={600} order={4}>City</Title>
@@ -114,10 +118,11 @@ function SearchFilter(){
 
             <Stack gap={2}>
                 <Title fw={600} order={4}>Price</Title>
-                <RangeSlider color="blue" onChangeEnd={handlePriceRange} defaultValue={[20, 60]} min={0} max={300} step={10}/>
+                <RangeSlider color="blue" onChangeEnd={handlePriceRange} defaultValue={[70000, 9000]} min={0} max={100000} step={2000}/>
             </Stack>
 
-            <Stack gap={2}>
+            
+            {/*<Stack gap={2}>
                 <Title fw={600} order={4}>Minimum Rating</Title>
                 <Chip.Group>
                     <Stack gap={3}>
@@ -128,7 +133,7 @@ function SearchFilter(){
                         <Chip value="5" variant="outline"><Text><StarIcon weight="duotone"/> 5.0+ Stars</Text></Chip>
                     </Stack>
                 </Chip.Group>
-            </Stack>
+            </Stack>*/}
         </Stack>
     )
 }
@@ -201,7 +206,7 @@ function Catalogue(){
                     }
                     <Stack align="stretch" justify="flex-start" gap="md">
                         <Group justify="space-between">
-                            <Title>124 Professionals found</Title>
+                            <Title>{searchResults.length} {searchResults.length<=1 ? "Professional":"Professionals"} found</Title>
                             <Group gap="md">
                                 {isMobile? <FilterButton/>:null}
                                 <Text c="dimmed">Sort by: </Text>
@@ -216,7 +221,7 @@ function Catalogue(){
                                 <CatalogueEntry service={item} key={index}/>
                             ))
                         }
-                        <Pagination total={10} />
+                        {/*<Pagination total={10} />*/}
                     </Stack>
                 </Group>
             </Box>

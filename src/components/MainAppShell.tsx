@@ -13,9 +13,10 @@ import {
 import {useDisclosure} from "@mantine/hooks";
 import {ArrowRightIcon, DoorOpenIcon, MagnifyingGlassIcon} from '@phosphor-icons/react';
 import {type ReactNode, useState} from "react";
-import {useNavigate, useLocation} from "react-router-dom";
+import {useNavigate, useLocation, useSearchParams} from "react-router-dom";
 
 const links = [
+    /*
     {
         value: "/",
         label: (
@@ -28,6 +29,7 @@ const links = [
             <Title order={3}>Catalogue</Title>
         ),
     },
+    */
     {
         value: '/support',
         label: (
@@ -38,20 +40,22 @@ const links = [
 
 function SearchBar(){
     const [query, setQuery] = useState('')
+    const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     
     function onSearch() {
         if (!query.trim()) return
-        navigate({
-            pathname: '/',
-            search: `?search=${encodeURIComponent(query)}`
-        })
+        const params = new URLSearchParams(searchParams)
+        if (query) params.set('search', query)
+        else       params.delete('search')
+        navigate({ pathname: '/', search: `?${params.toString()}` })
     }
     
     return (
         <TextInput
             radius="xl"
             size="md"
+            w="600"
             placeholder="Search services"
             onKeyDown={(e) => {
                 if (e.key === 'Enter'){
