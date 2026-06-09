@@ -170,13 +170,19 @@ function Catalogue(){
     useEffect(() => {
         const query = searchParams.get('search')
         console.log('search param changed:', query) // does this fire?
-        if (query) getSearchData({
-            query:    searchParams.get('search')   ?? '',
-            city:     searchParams.get('city')     ?? undefined,
-            category: searchParams.get('category') ? Number(searchParams.get('category')) : undefined,
-            minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
-            maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
-        })
+        if (query) {
+            getSearchData({
+                query:    searchParams.get('search')   ?? '',
+                city:     searchParams.get('city')     ?? undefined,
+                category: searchParams.get('category') ? Number(searchParams.get('category')) : undefined,
+                minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
+                maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
+            })  
+        }
+        else
+        {
+            fetchLatest()
+        }
     }, [searchParams])
     
     async function getSearchData(filters: SearchFilters){
@@ -192,6 +198,25 @@ function Catalogue(){
             return;
         }
         setSearchResults(data);
+        console.log(data)
+    }
+
+    async function fetchLatest() {
+        console.log("Latest fetched")
+        const { data, error } = await supabase
+            .from('services')
+            .select(`
+      serviceid,
+      title,
+      description,
+      minprice,
+      maxprice,
+      pricetype
+    `)
+            .order('createdat', { ascending: false })
+            .limit(20)
+
+        if (!error) setSearchResults(data)
         console.log(data)
     }
     
