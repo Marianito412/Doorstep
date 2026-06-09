@@ -10,7 +10,7 @@ type ServiceCategory = {
 
 function SupabaseTest() {
     const [instruments, setInstruments] = useState<ServiceCategory[]>([]);
-    const user = useAuthContext().user
+    //const user = useAuthContext().user
     const profile = useAuthContext().profile
     const signOut = useAuthContext().signOut
     

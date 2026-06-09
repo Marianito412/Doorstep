@@ -159,7 +159,7 @@ type SearchFilters = {
 
 function Catalogue(){
     const isMobile = useMediaQuery('(max-width: 768px)')
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const [searchResults, setSearchResults] = useState<Service[]>([])
 
     useEffect(() => {

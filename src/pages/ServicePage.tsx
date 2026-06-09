@@ -65,7 +65,7 @@ function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
         <Card shadow="lg" padding="lg" withBorder miw={350}>
             <Card.Section bg="gray.2">
                 <Group align="self-end" gap={3} mx="lg" mt="lg">
-                    <Title fw={600} c="teal.9">${minPrice}</Title>
+                    <Title fw={600} c="teal.9">{minPrice}-{maxPrice} {priceType === "hourly" ? "$/hr":""}</Title>
                     <Text c="gray.7" fw={600}>/hour</Text>
                 </Group>
                 <Text ml="lg" c="gray.7" fw={600}>*Starting rate for standard service</Text>
@@ -121,8 +121,8 @@ type Service = {
 }
 
 function ServicePage(){
-    let [service, setService] = useState<Service>(null);
-    const [searchParams, setSearchParams] = useSearchParams();
+    let [service, setService] = useState<Service>();
+    const [searchParams] = useSearchParams();
     const isMobile = useMediaQuery('(max-width: 768px)')
 
     const serviceId = searchParams.get("id") || "";
@@ -142,15 +142,6 @@ function ServicePage(){
         setService(data[0]);
     }
     
-    async function getService() {
-        const { data, error } = await supabase.from("services").select().eq("serviceid", serviceId);
-        if (error) {
-            console.error(error);
-            return;
-        }
-        setService(data[0])
-    }
-    
     return (
         <MainAppShell>
             <Group wrap="nowrap" justify="center" align="flex-start" mt="lg" 
@@ -164,7 +155,7 @@ function ServicePage(){
                         reviewCount={128}
                         imageUrl="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-6.png"
                     />
-                    <ServiceProviderCard name = {service?.fullname}/>
+                    <ServiceProviderCard name = {service ? service.fullname : ""}/>
                     <Title order={2} fw={600}>About this Service</Title>
 
                     {service ?
