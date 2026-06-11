@@ -118,7 +118,7 @@ function SearchFilter(){
 
             <Stack gap={2}>
                 <Title fw={600} order={4}>Price</Title>
-                <RangeSlider color="blue" onChangeEnd={handlePriceRange} defaultValue={[70000, 9000]} min={0} max={100000} step={2000}/>
+                <RangeSlider color="blue" onChangeEnd={handlePriceRange} defaultValue={[7000, 12000]} min={0} max={100000} step={2000}/>
             </Stack>
 
             
