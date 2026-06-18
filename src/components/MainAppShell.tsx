@@ -70,8 +70,8 @@ function SearchBar(){
                 <ActionIcon onClick={(e) => {
                    e.preventDefault()
                    onSearch() 
-                }} size={32} radius="xl" variant="filled" aria-label="Search">
-                    <ArrowRightIcon size={18} stroke="2" />
+                }} size={32} radius="xl" color="#BEBBB6" aria-label="Search">
+                    <ArrowRightIcon color="black" size={18} stroke="2" />
                 </ActionIcon>
             }
             aria-label="Search questions"
