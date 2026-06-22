@@ -1,8 +1,8 @@
 import {
     ActionIcon,
-    AppShell,
+    AppShell, Avatar,
     Burger,
-    Group,
+    Group, Menu,
     NavLink,
     SegmentedControl,
     TextInput,
@@ -11,9 +11,17 @@ import {
 } from "@mantine/core";
 
 import {useDisclosure} from "@mantine/hooks";
-import {ArrowRightIcon, DoorOpenIcon, MagnifyingGlassIcon} from '@phosphor-icons/react';
+import {
+    ArrowRightIcon,
+    CheckSquareIcon,
+    DoorOpenIcon,
+    GearSixIcon,
+    MagnifyingGlassIcon,
+    SignOutIcon
+} from '@phosphor-icons/react';
 import {type ReactNode, useState} from "react";
 import {useNavigate, useLocation, useSearchParams} from "react-router-dom";
+import {useAuthContext} from "../context/AuthContext.tsx";
 
 const links = [
     /*
@@ -31,9 +39,9 @@ const links = [
     },
     */
     {
-        value: '/support',
+        value: '/bookedservices',
         label: (
-            <Title order={3}>Support</Title>
+            <Title order={4}>Servicios Reservados</Title>
         ),
     }
 ]
@@ -55,8 +63,8 @@ function SearchBar(){
         <TextInput
             radius="xl"
             size="md"
-            w="600"
-            placeholder="Search services"
+            maw="600"
+            placeholder="Buscar servicios"
             onKeyDown={(e) => {
                 if (e.key === 'Enter'){
                     e.preventDefault()
@@ -81,6 +89,11 @@ function SearchBar(){
 
 function MainAppShell({children}: {children: ReactNode}) {
     const [opened, { toggle }] = useDisclosure();
+    
+    const signOut = useAuthContext().signOut
+    const profile = useAuthContext().profile
+    //const user = useAuthContext().user
+    
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -88,9 +101,13 @@ function MainAppShell({children}: {children: ReactNode}) {
         navigate(value)
     }
     
-    const navItems = links.map((link) => {
-        return <NavLink href={link.value} label={link.label}></NavLink>
+    const navItems = links.map((link, idx) => {
+        return <NavLink key={idx} href={link.value} label={link.label}></NavLink>
     })
+    
+    async function handleLogout(){
+        await signOut()
+    }
     
     return (
         <AppShell
@@ -102,20 +119,42 @@ function MainAppShell({children}: {children: ReactNode}) {
                 <Group h="100%" justify="space-between">
                     <Group hiddenFrom="sm">
                         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-                        <UnstyledButton component="a" href="/">
+                        <UnstyledButton component="button" onClick={() => {navigate("/")}}>
                             <Title><DoorOpenIcon weight="duotone"/>Doorstep</Title>    
                         </UnstyledButton>
                     </Group>
                     
                     <Group ml="10" visibleFrom="sm">
-                        <UnstyledButton component="a" href="/">
+                        <UnstyledButton component="button" onClick={() => {navigate("/")}}>
                             <Title><DoorOpenIcon weight="duotone"/>Doorstep</Title>
                         </UnstyledButton>
                     </Group>
 
                     <SearchBar/>
-                    
-                    <SegmentedControl value={location.pathname} mr="70" visibleFrom="sm" data={links} onChange={onSegmenteControlChange}></SegmentedControl>
+                    <Group justify="flex-start" mr={70}>
+                        <SegmentedControl value={location.pathname} visibleFrom="sm" data={links}
+                                          onChange={onSegmenteControlChange}></SegmentedControl>
+                        <Menu width={260}>
+                            <Menu.Target>
+                                <Avatar color="initials" component="button" name={(profile && profile.fullname)? profile.fullname : "Anonymous"}/>
+                                {/*<Button color="#BEBBB6" c="black" variant="subtle" h={45}>
+                                    <Group>
+                                        <Avatar color="initials" name={(profile && profile.fullname)? profile.fullname : "Anonymous"}/>
+                                        {profile?.fullname}
+                                        <CaretDownIcon size={14}/>
+                                    </Group>
+                                </Button>*/}
+                            </Menu.Target>
+
+                            <Menu.Dropdown>
+                                <Menu.Item leftSection={<CheckSquareIcon/>} onClick={()=>{navigate("/providerdashboard")}}>Servicios Pendientes</Menu.Item>
+                                <Menu.Item leftSection={<GearSixIcon/>}>Configuración de Cuenta</Menu.Item>
+                                <Menu.Item leftSection={<SignOutIcon/>} onClick={handleLogout}>Cerrar Sesión</Menu.Item>
+                            </Menu.Dropdown>
+
+                        </Menu>
+
+                    </Group>
                 </Group>
             </AppShell.Header>
 

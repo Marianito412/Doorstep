@@ -4,11 +4,16 @@ import {AuthProvider} from "./context/AuthContext.tsx";
 import Catalogue from "./pages/Catalogue.tsx";
 import ServicePage from "./pages/ServicePage.tsx";
 import ProviderDashboard from "./pages/ProviderDashboard.tsx";
+import BookedServices from "./pages/BookedServices.tsx";
 
 const router = createBrowserRouter([
     {
         path: '/',
         element: <AuthProvider><Catalogue/></AuthProvider>
+    },
+    {
+        path: '/bookedservices',
+        element: <AuthProvider><BookedServices/></AuthProvider>
     },
     {
         path: '/providerdashboard',

@@ -1,13 +1,14 @@
 import MainAppShell from "../components/MainAppShell.tsx";
 import {
     Card, Group, Space, Stack, Title, Text, Button, Box, Select, RangeSlider,
-    Avatar, Modal, type RangeSliderValue
+    Avatar, Modal, type RangeSliderValue, UnstyledButton
 } from "@mantine/core";
 import {FunnelIcon} from "@phosphor-icons/react";
 import {useDisclosure, useMediaQuery} from "@mantine/hooks";
 import {supabase} from "../lib/supabase.ts";
 import {useEffect, useState} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
+import classes from './range-slider.module.css';
 
 type Service = {
     serviceid: string
@@ -21,6 +22,8 @@ type Service = {
 function CatalogueEntry({service}: {service: Service}) {
     const isMobile = useMediaQuery('(max-width: 768px)')
 
+    const navigate = useNavigate();
+
     function truncateHtml(html: string, maxChars: number): string {
         const doc   = new DOMParser().parseFromString(html, 'text/html')
         const plain = doc.body.textContent ?? ''
@@ -29,7 +32,8 @@ function CatalogueEntry({service}: {service: Service}) {
     }
     
     return (
-        <Card orientation={isMobile ? 'vertical' : 'horizontal'} withBorder maw="1200" component="a" href={"service?id="+service.serviceid}>
+        <UnstyledButton onClick={() => {navigate("service?id="+service.serviceid)}}>
+        <Card orientation={isMobile ? 'vertical' : 'horizontal'} withBorder maw="1200">
             <Avatar radius="xl" size={150}/>
             <Space w="30"/>
             <Stack align="stretch" w="100%">
@@ -48,6 +52,7 @@ function CatalogueEntry({service}: {service: Service}) {
                 
             </Stack>
         </Card>
+        </UnstyledButton>
     )
 }
 
@@ -118,11 +123,8 @@ function SearchFilter(){
 
             <Stack gap={2}>
                 <Title fw={600} order={4}>Price</Title>
-                <RangeSlider 
-                     
-                    style={{
-                        track: {color: 'rgb(190, 187, 182)'}, 
-                        bar: {color: "black"}}}
+                <RangeSlider
+                    classNames={classes}
                     onChangeEnd={handlePriceRange} 
                     defaultValue={[7000, 12000]} 
                     min={0} max={100000} step={2000}/>

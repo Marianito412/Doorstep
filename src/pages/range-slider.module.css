@@ -1,0 +1,17 @@
+/* RangeSlider.module.css */
+.track::before {
+    background-color: #BEBBB6; /* unfilled part */
+}
+
+.bar {
+    background-color: black; /* filled part */
+}
+
+.thumb {
+    background-color: black;
+    border-color: gray;
+}
+
+.label{
+    background-color: #BEBBB6;
+}
