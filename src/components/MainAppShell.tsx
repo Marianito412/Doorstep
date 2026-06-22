@@ -41,7 +41,7 @@ const links = [
     {
         value: '/bookedservices',
         label: (
-            <Title order={4}>Servicios Reservados</Title>
+            <Title order={4}>Servicios Contratados</Title>
         ),
     }
 ]

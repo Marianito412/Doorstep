@@ -146,14 +146,14 @@ function BookedServices(){
                 <Stack mr={100} ml={100}>
                     <Group wrap="nowrap" justify="space-between" align="flex-end">
                         <Stack gap="xs">
-                            <Title>Mis Reservas</Title>
-                            <Text size="xl">Administra acá tus servicios que hayas reservado con proveedores de servicios de
+                            <Title>Mis Servicios Contratados</Title>
+                            <Text size="xl">Administra acá tus servicios que hayas contratado con proveedores de servicios de
                                 Doorstep.</Text>
                         </Stack>
                         
                         <Tabs.List>
-                            <Tabs.Tab value="active"><Text size="lg">Activas</Text></Tabs.Tab>
-                            <Tabs.Tab value="past"><Text size="lg">Pasadas</Text></Tabs.Tab>
+                            <Tabs.Tab value="active"><Text size="lg">Activos</Text></Tabs.Tab>
+                            <Tabs.Tab value="past"><Text size="lg">Pasados</Text></Tabs.Tab>
                         </Tabs.List>
                         
                     </Group>

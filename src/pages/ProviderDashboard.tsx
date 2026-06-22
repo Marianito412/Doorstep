@@ -2,7 +2,7 @@ import {
     Accordion, AccordionControl,
     AccordionItem, AccordionPanel,
     Button,
-    Card, Collapse, Drawer,
+    Card, Collapse,
     Group,
     NumberFormatter, Space,
     Stack,

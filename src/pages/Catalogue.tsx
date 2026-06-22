@@ -33,7 +33,7 @@ function CatalogueEntry({service}: {service: Service}) {
     
     return (
         <UnstyledButton onClick={() => {navigate("service?id="+service.serviceid)}}>
-        <Card orientation={isMobile ? 'vertical' : 'horizontal'} withBorder maw="1200">
+        <Card orientation={isMobile ? 'vertical' : 'horizontal'} withBorder maw="1000">
             <Avatar radius="xl" size={150}/>
             <Space w="30"/>
             <Stack align="stretch" w="100%">
@@ -43,7 +43,7 @@ function CatalogueEntry({service}: {service: Service}) {
                         {service.minprice===service.maxprice ? "₡"+service.minprice : "₡"+service.minprice+" - "+"₡"+service.maxprice} {service.pricetype === "hourly" ? "/hr" : ""}
                     </Title>
                 </Group>
-                {truncateHtml(service.description, 300)}
+                <Text lineClamp={2}>{truncateHtml(service.description, 300)}</Text>
                 
                 {/*<Group>
                     <Button variant="light" color="cyan">Book Now</Button>
@@ -101,7 +101,7 @@ function SearchFilter(){
     return (
         <Stack align="stretch">
             <Group justify="space-between" align="flex-end">
-                <Title order={2}>Filter</Title>
+                <Title order={2}>Filtrar</Title>
                 {/*<Anchor>Clear All</Anchor>*/}
             </Group>
 
@@ -113,16 +113,16 @@ function SearchFilter(){
             </Stack>*/}
 
             <Stack gap={2}>
-                <Title fw={600} order={4}>City</Title>
+                <Title fw={600} order={4}>Ciudad</Title>
                 <Select
-                    placeholder="Select a City"
+                    placeholder="Selecciona una ciudad"
                     data={cities}
                     onChange={handleCityFilter}
                 />
             </Stack>
 
             <Stack gap={2}>
-                <Title fw={600} order={4}>Price</Title>
+                <Title fw={600} order={4}>Precio</Title>
                 <RangeSlider
                     classNames={classes}
                     onChangeEnd={handlePriceRange} 
@@ -152,7 +152,7 @@ function FilterButton(){
     
     return (
         <>
-            <Modal opened={opened} onClose={close} title="Search Filters">
+            <Modal opened={opened} onClose={close} title="Filtros de Busqueda">
                 <SearchFilter/>
             </Modal>
 
@@ -284,13 +284,13 @@ function Catalogue(){
                     }
                     <Stack align="stretch" justify="flex-start" gap="md">
                         <Group justify="space-between">
-                            <Title>{searchResults.length} {searchResults.length<=1 ? "Professional":"Professionals"} found</Title>
+                            <Title>{searchResults.length} {searchResults.length<=1 ? "Profesional":"Profesionales"} encontrados</Title>
                             <Group gap="md">
                                 {isMobile? <FilterButton/>:null}
-                                <Text c="dimmed">Sort by: </Text>
+                                <Text c="dimmed">Ordenar por: </Text>
                                 <Select
-                                    placeholder="Recommended"
-                                    data={['Recommended', 'Highest Rated', 'Price: Low to High']}
+                                    placeholder="Recomendado"
+                                    data={['Recomendado', 'Mas Valorado', 'Precio: Bajo a Alto']}
                                 />
                             </Group>
                         </Group>
