@@ -3,7 +3,7 @@ import {
     Card, Group, Space, Stack, Title, Text, Button, Box, Select, RangeSlider,
     Avatar, Modal, type RangeSliderValue, UnstyledButton
 } from "@mantine/core";
-import {FunnelIcon} from "@phosphor-icons/react";
+import {EmptyIcon, FunnelIcon} from "@phosphor-icons/react";
 import {useDisclosure, useMediaQuery} from "@mantine/hooks";
 import {supabase} from "../lib/supabase.ts";
 import {useEffect, useState} from "react";
@@ -205,7 +205,6 @@ function Catalogue(){
     
     async function getSearchData(filters: SearchFilters){
         if (filters.query){
-            console.log("fuck")
             const { data, error } = await supabase.rpc("search_services", {
                 query:            filters.query        ?? '',
                 filter_city:      filters.city         ?? null,
@@ -284,7 +283,7 @@ function Catalogue(){
                     }
                     <Stack align="stretch" justify="flex-start" gap="md">
                         <Group justify="space-between">
-                            <Title>{searchResults.length} {searchResults.length<=1 ? "Profesional":"Profesionales"} encontrados</Title>
+                            <Title>{searchResults.length} {searchResults.length==1 ? "Profesional":"Profesionales"} encontrados</Title>
                             <Group gap="md">
                                 {isMobile? <FilterButton/>:null}
                                 <Text c="dimmed">Ordenar por: </Text>
@@ -295,9 +294,16 @@ function Catalogue(){
                             </Group>
                         </Group>
                         {
-                            searchResults.map((item, index) => (
-                                <CatalogueEntry service={item} key={index}/>
-                            ))
+                            searchResults.length > 0 ?
+                                searchResults.map((item, index) => (
+                                    <CatalogueEntry service={item} key={index}/>
+                                ))
+                                :
+                                <Stack align="center" gap="md" >
+                                    <EmptyIcon size={96} weight="duotone"/>
+                                    <Title fw={600}>¡No hay resultados!</Title>
+                                    <Text c="dimmed" fw={550}>No se encontraron resultados para "{searchParams.get('search')}".</Text>
+                                </Stack>
                         }
                         {/*<Pagination total={10} />*/}
                     </Stack>

@@ -1,10 +1,27 @@
 import MainAppShell from "../components/MainAppShell.tsx";
-import {Title, Text, Tabs, Group, Stack, Space, Card, Avatar, Badge, Button} from "@mantine/core";
+import {
+    Title,
+    Text,
+    Tabs,
+    Group,
+    Stack,
+    Space,
+    Card,
+    Avatar,
+    Badge,
+    Button,
+    Modal,
+    TextInput,
+    Rating, Textarea
+} from "@mantine/core";
 import {CalendarBlankIcon, CalendarSlashIcon, CalendarXIcon, ChatIcon} from "@phosphor-icons/react";
 import {useEffect, useState} from "react";
 import {useAuthContext} from "../context/AuthContext.tsx";
 import {supabase} from "../lib/supabase.ts";
 import dayjs from "../lib/dayjs.ts";
+import {useDisclosure} from "@mantine/hooks";
+import {useForm} from "@mantine/form";
+import {notifications} from "@mantine/notifications";
 
 type ClientServiceRequest = {
     request_id: string;
@@ -41,6 +58,113 @@ function getStatusColor(status: string): string{
         return "gray.5"
     }
     return "gray"
+}
+
+function FinishedServiceCard({csr}: {csr: ClientServiceRequest}){
+    const [minPrice, setMinPrice] = useState(0)
+    const [maxPrice, setMaxPrice] = useState(0)
+    const [isOpen, {open, close}] = useDisclosure(false)
+    const [submitting, setSubmitting] = useState(false);
+
+    const form = useForm({
+        initialValues: {
+            rating: 0,
+            comment: '',
+        },
+        validate: {
+            rating: (value) => (value === 0 ? 'Por favor calificá tu experiencia' : null),
+            comment: (value) => (value.trim().length === 0 ? 'Por favor agregá un comentario' : null),
+        },
+    });
+    
+    useEffect(() => {
+        fetchPrice()
+    }, []);
+    
+    async function fetchPrice(){
+        const {data, error} = await supabase.from("services").select("*").eq("serviceid", csr.service_id);
+        if (!data){
+            console.log("failed fetching price")
+            return;
+        }
+        setMinPrice(data[0].minprice)
+        setMaxPrice(data[0].maxprice)
+    }
+
+    async function handleSubmitReview(values: typeof form.values) {
+        setSubmitting(true);
+
+        const { error } = await supabase.from('reviews').insert({
+            servicerequestid: csr.request_id,
+            rating: values.rating,
+            comment: values.comment,
+        });
+
+        setSubmitting(false);
+
+        if (error) {
+            notifications.show({
+                color: 'red',
+                title: 'Error al enviar la reseña',
+                message: error.message,
+            });
+            return;
+        }
+
+        notifications.show({
+            color: 'green',
+            title: '¡Reseña enviada!',
+            message: 'Gracias por tu retroalimentación.',
+        });
+
+        form.reset();
+        close();
+    }
+    
+    return (
+        <>
+            <Modal opened={isOpen} onClose={close} title={csr.service_title}>
+                <form onSubmit={form.onSubmit(handleSubmitReview)}>
+                    <Stack>
+                        <Title>Dejá tu reseña</Title>
+                        <Stack gap={0}>
+                            <Text fw={600}>¿Cómo calificarías tu experiencia?</Text>
+                            <Rating
+                                value={form.values.rating}
+                                onChange={(value) => form.setFieldValue('rating', value)}
+                            />
+                        </Stack>
+                        <Textarea
+                            label={<Text fw={600}>¿Tenés algún comentario?</Text>}
+                            {...form.getInputProps('comment')}
+                        />
+                        <Button type="submit" variant="outline" color="black" loading={submitting}>
+                            Enviar Reseña
+                        </Button>
+                    </Stack>
+                </form>
+            </Modal>
+            <Card>
+                <Group align="flex-start">
+                    <Avatar radius="xl" size={120}/>
+                    <Stack gap={0}>
+                        <Badge color={getStatusColor(csr.status)}>{csr.status}</Badge>
+                        <Title order={3}>{csr.service_title}</Title>
+                        <Text
+                            c="gray.7"><CalendarBlankIcon/> {dayjs(csr.servicetime).format('dddd, MMM DD, [•] h:mm a')}
+                        </Text>
+                        <Text>{csr.description}</Text>
+                    </Stack>
+                    <Stack gap={0} align="flex-end">
+                        <Text c="gray.8" fw={600}>Costo Estimado</Text>
+                        <Title order={2} c="teal.9">₡{((minPrice + maxPrice) / 2).toString()}</Title>
+                        <Button variant="outline" color="black" onClick={open}>Agregar reseña</Button>
+                    </Stack>
+                </Group>
+                <Space h="md"/>
+            </Card>
+        </>
+    );
 }
 
 function BookedServiceCard({csr}: {csr: ClientServiceRequest}){
@@ -163,7 +287,8 @@ function BookedServices(){
                                 serviceRequests.filter((sr) => (
                                     sr.status == "Aceptado" ||
                                     sr.status == "Listo para iniciar" ||
-                                    sr.status == "Iniciado"
+                                    sr.status == "Iniciado" ||
+                                    sr.status == "Rechazado"
                                 ))
                                     .map((sr) => (
                                         <BookedServiceCard csr={sr}/>
@@ -172,7 +297,16 @@ function BookedServices(){
                         </Stack>
                     </Tabs.Panel>
                     <Tabs.Panel value="past">
-                        <Title>Pasadas</Title>
+                        <Stack align="flex-start" justify="flex-start">
+                            {
+                                serviceRequests.filter((sr) => (
+                                    sr.status == "Finalizado"
+                                ))
+                                    .map((sr) => (
+                                        <FinishedServiceCard csr={sr}/>
+                                    ))
+                            }
+                        </Stack>
                     </Tabs.Panel>
                 </Stack>
             </Tabs>

@@ -14,7 +14,7 @@ import {
     Typography,
     Modal,
     TextInput,
-    Textarea
+    Textarea, Rating
 } from "@mantine/core";
 import '@mantine/dates/styles.css'
 import {CheckCircleIcon, StarIcon} from "@phosphor-icons/react";
@@ -68,7 +68,7 @@ function ServiceCard({ title, rating, reviewCount, imageUrl }: ServiceCardProps)
                     <StarIcon size={16} weight="fill" color="#20C997" />
                     <Text c="white" size="sm" fw={600}>{rating}</Text>
                     <Text c="rgba(255,255,255,0.75)" size="sm">
-                        ({reviewCount} Verified Reviews)
+                        ({reviewCount} Reseñas)
                     </Text>
                 </Group>
             </Box>
@@ -274,6 +274,79 @@ type Service = {
     bio: string
 }
 
+type ServiceReview = {
+    reviewid: string;
+    rating: number;
+    comment: string;
+    client_name: string;
+    created_at: string;
+}
+
+function ServiceReviewCard({SR}: {SR: ServiceReview}) {
+    return (
+        <Card miw={700}>
+            <Group justify="space-between"  gap="xs">
+                <Group gap="xs">
+                    <Avatar size="lg" color="initials" name={SR.client_name}/>
+                    <Stack gap={0}>
+                        <Title order={4} fw={600}>{SR.client_name}</Title>
+                        <Text>{dayjs(SR.created_at).fromNow()}</Text>
+                    </Stack>
+                </Group>
+                <Rating value={SR.rating} readOnly/>
+            </Group>
+            <Text>"{SR.comment}"</Text>
+        </Card>
+    );
+}
+
+function ServiceReviews({serviceId}: {serviceId: string}) {
+    const [reviews, setReviews] = useState<ServiceReview[]>([]);
+
+    useEffect(() => {
+        if (!serviceId) return;
+        fetchReviewsForService(serviceId).then(setReviews);
+    }, [serviceId]);
+    
+    async function fetchReviewsForService(serviceId: string): Promise<ServiceReview[]> {
+        const { data, error } = await supabase
+            .from('reviews')
+            .select(`
+      reviewid,
+      rating,
+      comment,
+      createdat,
+      servicerequests!inner(
+        serviceid,
+        profiles!clientprofileid!inner(fullname)
+      )
+    `)
+            .eq('servicerequests.serviceid', serviceId);
+
+        if (error) {
+            console.error('Error fetching reviews:', error);
+            return [];
+        }
+
+        // Flatten the nested join into the shape we actually want to use
+        return (data ?? []).map((row: any) => ({
+            reviewid: row.reviewid,
+            rating: row.rating,
+            comment: row.comment,
+            created_at: row.createdat,
+            client_name: row.servicerequests.profiles.fullname,
+        }));
+    }
+    
+    return (
+        <Stack gap="xs" align="flex-start">
+            {reviews.map((review: ServiceReview) => (
+                <ServiceReviewCard SR={review}/>
+            ))}
+        </Stack>
+    )
+}
+
 function ServicePage(){
     let [service, setService] = useState<Service>();
     
@@ -313,7 +386,7 @@ function ServicePage(){
                         imageUrl="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-6.png"
                     />
                     <ServiceProviderCard name = {service ? service.fullname : ""} bio={service ? service.bio : ""}/>
-                    <Title order={2} fw={600}>About this Service</Title>
+                    <Title order={2} fw={600}>Sobre Este Servicio</Title>
 
                     {service ?
                         <Card shadow="lg" withBorder>
@@ -321,7 +394,11 @@ function ServicePage(){
                                 <div dangerouslySetInnerHTML={{__html: service.description}}/>
                             </Typography>
                         </Card>
-                        : null}
+                        : null
+                    }
+                    <Divider/>
+                    <Title order={2} fw={600}>Reseñas del Servicio</Title>
+                    <ServiceReviews serviceId={serviceId}/>
                 </Stack>
                 <Stack style={{ width: isMobile ? '100%' : 320, flexShrink: 0 }}>
                     <PriceCard minPrice={service?.minprice || 0} maxPrice={service?.maxprice || 0} priceType={service?.pricetype || "hourly"}/>
