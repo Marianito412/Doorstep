@@ -167,6 +167,7 @@ function FinishedServiceCard({csr}: {csr: ClientServiceRequest}){
 }
 
 function BookedServiceCard({csr}: {csr: ClientServiceRequest}){
+    const {triggerRefresh} = useAuthContext()
     const [minPrice, setMinPrice] = useState(0)
     const [maxPrice, setMaxPrice] = useState(0)
     
@@ -207,12 +208,12 @@ function BookedServiceCard({csr}: {csr: ClientServiceRequest}){
             console.error('Error updating service request status:', error);
             return false;
         }
-
         return true;
     }
     
     async function handleServiceStart(){
         await updateServiceRequestStatus(csr.request_id, "Iniciado");
+        triggerRefresh()
     }
     
     return (
@@ -230,7 +231,7 @@ function BookedServiceCard({csr}: {csr: ClientServiceRequest}){
                     <Title order={2} c="teal.9">₡{((minPrice + maxPrice)/2).toString()}</Title>
                     {
                         csr.status == "Listo para iniciar" 
-                        ? <Button onClick={handleServiceStart}>Iniciar Servicio</Button> : null
+                        ? <Button onClick={handleServiceStart} variant="outline" color="black">Iniciar Servicio</Button> : null
                     }
                     
                 </Stack>
@@ -248,13 +249,13 @@ function BookedServiceCard({csr}: {csr: ClientServiceRequest}){
 }
 
 function BookedServices(){
-    const { profile, loading: authLoading } = useAuthContext()
+    const { profile, loading: authLoading, refresh } = useAuthContext()
     const [serviceRequests, setServiceRequests] = useState<ClientServiceRequest[]>([])
 
     useEffect(() => {
         if (authLoading || !profile) return // wait until auth has resolved
         fetchClientServices()
-    }, [authLoading, profile]);
+    }, [authLoading, profile, refresh]);
     
     async function fetchClientServices(){
         const { data } = await supabase.rpc('get_requests_for_client', { p_client_id: profile?.profileid })
@@ -266,7 +267,7 @@ function BookedServices(){
     return (
         <MainAppShell>
             <Tabs color="black" defaultValue="active" variant="pills">
-                <Stack mr={100} ml={100}>
+                <Stack mr={160} ml={160}>
                     <Group wrap="nowrap" justify="space-between" align="flex-end">
                         <Stack gap="xs">
                             <Title>Mis Servicios Contratados</Title>

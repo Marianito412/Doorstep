@@ -342,9 +342,13 @@ function ServiceReviews({serviceId}: {serviceId: string}) {
     
     return (
         <Stack gap="xs" align="flex-start">
-            {reviews.map((review: ServiceReview) => (
-                <ServiceReviewCard SR={review}/>
-            ))}
+            {reviews.length > 0 ?
+                reviews.map((review: ServiceReview) => (
+                    <ServiceReviewCard SR={review}/>
+                ))
+                :
+                <Text fw={600} c="dimmed">Aun no hay reseñas para este servicio </Text>
+            }
         </Stack>
     )
 }

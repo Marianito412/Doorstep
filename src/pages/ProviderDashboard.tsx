@@ -29,13 +29,14 @@ type ServiceRequest = {
 }
 
 function ServiceRequestCard({sr}: {sr: ServiceRequest}) {
+    const {triggerRefresh} = useAuthContext()
     
     async function reject(){
         await supabase.rpc('respond_to_service_request', {
             p_service_request_id: sr.servicerequestid,
             p_accepted: false, // or false to reject
         });
-        
+        triggerRefresh()
         console.log("Reject")
     }
     
@@ -44,7 +45,7 @@ function ServiceRequestCard({sr}: {sr: ServiceRequest}) {
             p_service_request_id: sr.servicerequestid,
             p_accepted: true, // or false to reject
         });
-        
+        triggerRefresh()
         console.log("Accept");
     }
     
@@ -98,13 +99,13 @@ type statusData = {
 }
 
 function ScheduleItem({sr}: { sr: ServiceRequest }) {
-    const { profile, loading: authLoading } = useAuthContext()
+    const { profile, loading: authLoading, refresh, triggerRefresh } = useAuthContext()
     const [expanded, { toggle }] = useDisclosure(false);
     const [status, setStatus] = useState<statusData>({statusname:"test", order:0});
 
     useEffect(() => {
         fetchStatus()
-    }, [authLoading, profile]);
+    }, [authLoading, profile, refresh]);
     
     async function fetchStatus(){
         const {data} = await supabase
@@ -150,10 +151,12 @@ function ScheduleItem({sr}: { sr: ServiceRequest }) {
     
     async function setReady(){
         await updateServiceRequestStatus(sr.servicerequestid, 'Listo para iniciar');
+        triggerRefresh()
     }
     
     async function setFinished(){
         await updateServiceRequestStatus(sr.servicerequestid, 'Finalizado');
+        triggerRefresh()
     }
     
     return (
@@ -179,13 +182,13 @@ function ScheduleItem({sr}: { sr: ServiceRequest }) {
 }
 
 function ScheduleCard(){
-    const { profile, loading: authLoading } = useAuthContext()
+    const { profile, loading: authLoading, refresh } = useAuthContext()
     const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
     
     useEffect(() => {
         if (authLoading || !profile) return // wait until auth has resolved
         fecthServiceRequests()
-    }, [authLoading, profile]);
+    }, [authLoading, profile, refresh]);
     
     async function fecthServiceRequests(){
         if (profile == null){
@@ -237,13 +240,14 @@ function ScheduleCard(){
 }
 
 function ProviderDashboard() {
-    const { profile, loading: authLoading } = useAuthContext()
+    const { profile, loading: authLoading, refresh } = useAuthContext()
     const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>();
 
     useEffect(() => {
         if (authLoading || !profile) return // wait until auth has resolved
         fecthServiceRequests()
-    }, [authLoading, profile]);
+        console.log("refreshTriggered")
+    }, [authLoading, profile, refresh]);
     
     async function fecthServiceRequests() {
         if (profile == null){

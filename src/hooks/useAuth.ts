@@ -16,6 +16,8 @@ type AuthState = {
     user: User | null
     profile: Profile | null
     loading: boolean
+    refresh: number
+    triggerRefresh: () => void 
     signIn: (params: SignInParams) => Promise<void>
     signUp: (params: SignUpParams) => Promise<void>
     signOut: () => Promise<void>
@@ -23,6 +25,7 @@ type AuthState = {
 
 export function useAuth(): AuthState {
     const [user, setUser]       = useState<User | null>(null)
+    const [refresh, setRefresh] = useState(0)
     const [profile, setProfile] = useState<Profile | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
 
@@ -59,6 +62,10 @@ export function useAuth(): AuthState {
         setLoading(false)
     }
 
+    function triggerRefresh(){
+        setRefresh(prev => prev + 1);
+    }
+    
     async function signUp({ email, password, fullName }: SignUpParams): Promise<void> {
         const { error } = await supabase.auth.signUp({
             email,
@@ -81,5 +88,5 @@ export function useAuth(): AuthState {
     
     
 
-    return { user, profile, loading, signIn, signUp, signOut }
+    return { user, profile, loading, refresh, triggerRefresh, signIn, signUp, signOut }
 }

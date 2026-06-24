@@ -63,7 +63,7 @@ function SearchBar(){
         <TextInput
             radius="xl"
             size="md"
-            maw="600"
+            w="600"
             placeholder="Buscar servicios"
             onKeyDown={(e) => {
                 if (e.key === 'Enter'){
