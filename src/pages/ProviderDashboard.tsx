@@ -107,7 +107,7 @@ function ScheduleItem({sr}: { sr: ServiceRequest }) {
     }, [authLoading, profile]);
     
     async function fetchStatus(){
-        const {data, error} = await supabase
+        const {data} = await supabase
             .from("servicerequests")
             .select('servicerequeststatus!servicerequeststatusid!inner(*)')
             .eq("servicerequestid", sr.servicerequestid)
@@ -116,6 +116,7 @@ function ScheduleItem({sr}: { sr: ServiceRequest }) {
         if (!data){
             return;
         }
+        // @ts-ignore
         setStatus(data.servicerequeststatus)
         console.log(status);
     }

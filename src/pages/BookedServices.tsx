@@ -11,7 +11,6 @@ import {
     Badge,
     Button,
     Modal,
-    TextInput,
     Rating, Textarea
 } from "@mantine/core";
 import {CalendarBlankIcon, CalendarSlashIcon, CalendarXIcon, ChatIcon} from "@phosphor-icons/react";
@@ -82,7 +81,7 @@ function FinishedServiceCard({csr}: {csr: ClientServiceRequest}){
     }, []);
     
     async function fetchPrice(){
-        const {data, error} = await supabase.from("services").select("*").eq("serviceid", csr.service_id);
+        const {data} = await supabase.from("services").select("*").eq("serviceid", csr.service_id);
         if (!data){
             console.log("failed fetching price")
             return;
@@ -176,7 +175,7 @@ function BookedServiceCard({csr}: {csr: ClientServiceRequest}){
     }, []);
     
     async function fetchPrice(){
-        const {data, error} = await supabase.from("services").select("*").eq("serviceid", csr.service_id);
+        const {data} = await supabase.from("services").select("*").eq("serviceid", csr.service_id);
         if (!data){
             console.log("failed fetching price")
             return;

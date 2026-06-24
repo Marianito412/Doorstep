@@ -100,9 +100,11 @@ function PriceCard({minPrice, maxPrice, priceType}: PriceProps){
     const [opened, setOpened] = useState(false)
     const [loading, setLoading] = useState(false)
 
+    /*
     const delay = (ms: number): Promise<void> => {
         return new Promise((resolve) => setTimeout(resolve, ms));
     };
+    */
     
     const form = useForm<BookingFormValues>({
         initialValues: {
@@ -350,7 +352,7 @@ function ServiceReviews({serviceId}: {serviceId: string}) {
 function ServicePage(){
     let [service, setService] = useState<Service>();
     
-    const profile = useAuthContext().profile
+    //const profile = useAuthContext().profile
     
     const [searchParams] = useSearchParams();
     const isMobile = useMediaQuery('(max-width: 768px)')
